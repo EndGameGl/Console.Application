@@ -1,14 +1,15 @@
 ﻿namespace Console.Application.Parsing.TypeParsers;
 
-internal class Int32InputParser : GenericInputParser<int>
+public class UInt64InputParser : GenericInputParser<ulong>
 {
-    public Int32InputParser()
+    public UInt64InputParser()
     {
+        
     }
 
-    protected override int ParseData(string input)
+    protected override ulong ParseData(string input)
     {
-        if (int.TryParse(input, out var value))
+        if (ulong.TryParse(input, out var value))
         {
             return value;
         }

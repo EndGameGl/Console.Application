@@ -21,8 +21,17 @@ public class ConsoleApplicationBuilder
     private void RegisterDefaultParsers()
     {
         RegisterTypeParser<BooleanInputParser>();
+        RegisterTypeParser<Int16InputParser>();
+        RegisterTypeParser<UInt16InputParser>();
         RegisterTypeParser<Int32InputParser>();
+        RegisterTypeParser<UInt32InputParser>();
+        RegisterTypeParser<Int64InputParser>();
+        RegisterTypeParser<UInt64InputParser>();
         RegisterTypeParser<StringInputParser>();
+        RegisterTypeParser<CharInputParser>();
+        RegisterTypeParser<FloatInputParser>();
+        RegisterTypeParser<DoubleInputParser>();
+        RegisterTypeParser<DecimalInputParser>();
     }
     
     public ConsoleApplication Build()

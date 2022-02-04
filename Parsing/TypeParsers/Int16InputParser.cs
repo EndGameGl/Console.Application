@@ -1,14 +1,15 @@
 ﻿namespace Console.Application.Parsing.TypeParsers;
 
-internal class Int32InputParser : GenericInputParser<int>
+public class Int16InputParser : GenericInputParser<short>
 {
-    public Int32InputParser()
+    public Int16InputParser()
     {
+        
     }
 
-    protected override int ParseData(string input)
+    protected override short ParseData(string input)
     {
-        if (int.TryParse(input, out var value))
+        if (short.TryParse(input, out var value))
         {
             return value;
         }

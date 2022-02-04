@@ -1,14 +1,15 @@
 ﻿namespace Console.Application.Parsing.TypeParsers;
 
-internal class Int32InputParser : GenericInputParser<int>
+public class DecimalInputParser : GenericInputParser<decimal>
 {
-    public Int32InputParser()
+    public DecimalInputParser()
     {
+        
     }
 
-    protected override int ParseData(string input)
+    protected override decimal ParseData(string input)
     {
-        if (int.TryParse(input, out var value))
+        if (decimal.TryParse(input, out var value))
         {
             return value;
         }
