@@ -14,6 +14,8 @@ public class ConsoleApplication
     private CommandHandler CommandHandler { get; }
     public IServiceProvider ServiceProvider { get; }
 
+    private readonly string[] _args;
+
     public static ConsoleApplicationBuilder CreateBuilder(string[] args)
     {
         return new ConsoleApplicationBuilder(args);
@@ -22,6 +24,7 @@ public class ConsoleApplication
     internal ConsoleApplication(
         ConsoleApplicationBuilder builder)
     {
+        _args = builder.Args;
         CommandParser = new CommandParser(new[] { "-" });
         CommandHandler = new CommandHandler(builder.Services);
         ServiceProvider = builder.Services.BuildServiceProvider();
@@ -37,6 +40,20 @@ public class ConsoleApplication
         {
             var service = (ConsoleApplicationHostedService)ServiceProvider.GetRequiredService(type);
             await service.OnStart();
+        }
+
+        if (_args.Length > 0)
+        {          
+            var startupCommand = string.Join(" ", _args.Select(x =>
+            {
+                if (x.Contains(' '))
+                    return $"\"{x}\"";
+                return x;
+            }));
+            var commandArgs = CommandParser.ParseCommand(startupCommand);
+            await CommandHandler.HandleCommandLine(commandArgs, ServiceProvider, ParameterParser);
+            await OnExit();
+            return;
         }
 
         var shouldExit = false;

@@ -9,7 +9,7 @@ public class CommandOptionAttribute : Attribute
     /// <summary>
     ///     Alias under which this parameter would be called
     /// </summary>
-    public string Alias { get; }
+    public string? Alias { get; }
 
     /// <summary>
     ///     Whether this parameter is considered optional
@@ -17,7 +17,7 @@ public class CommandOptionAttribute : Attribute
     public bool IsOptional { get; }
 
     public CommandOptionAttribute(
-        string alias = null,
+        string? alias = null,
         bool isOptional = false)
     {
         Alias = alias;

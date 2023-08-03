@@ -2,7 +2,9 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Console.Application.Parsing;
+using Console.Application.Routing;
 using Console.Application.Routing.Attributes;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Console.Application.Reflection;
 
@@ -23,17 +25,17 @@ internal class CommandHandlerExecutor
     ///     Whether this operation should be executed async
     /// </summary>
     internal bool IsAsync { get; private set; }
-    
+
     /// <summary>
     ///     Path of this command
     /// </summary>
     internal string Path => _path;
-    
+
     /// <summary>
     ///     Description of this command
     /// </summary>
     internal string Description => _description;
-    
+
     /// <summary>
     /// Metadata for all existing parameters in this method
     /// </summary>
@@ -138,28 +140,9 @@ internal class CommandHandlerExecutor
         CommandArgs args,
         ParameterParser parameterParser)
     {
-        var executor = serviceProvider.GetService(_handlerType);
+        var executor = GetExecutorServiceInstance(serviceProvider);
         var parameters = new object[_parameterMetadatas.Count];
-
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            var argMetaData = _parameterMetadatas.First(x => x.Value.Order == i);
-            if (args.Args.TryGetValue(argMetaData.Key, out var argValue))
-            {
-                var value = parameterParser.Parse(argValue, argMetaData.Value.DataType);
-                parameters[i] = value;
-            }
-            else if (argMetaData.Value.IsOptional)
-            {
-                if (argMetaData.Value.CanBeNull)
-                {
-                    parameters[i] = null;
-                }
-                else
-                    parameters[i] = Activator.CreateInstance(argMetaData.Value.DataType);
-            }
-        }
-
+        FillOutCommandParameters(ref parameters, args, parameterParser);
         _methodToExecute.Invoke(executor, parameters);
     }
 
@@ -174,9 +157,31 @@ internal class CommandHandlerExecutor
         CommandArgs args,
         ParameterParser parameterParser)
     {
-        var executor = serviceProvider.GetService(_handlerType);
+        var executor = GetExecutorServiceInstance(serviceProvider);
         var parameters = new object[_parameterMetadatas.Count];
+        FillOutCommandParameters(ref parameters, args, parameterParser);
+        var task = (Task)_methodToExecute.Invoke(executor, parameters);
+        if (task is null)
+            throw new NullReferenceException("Couldn't get Task to execute");
+        await task;
+    }
 
+    /// <summary>
+    ///     Gets <see cref="CommandHandlerBase"/> instance class to execute
+    /// </summary>
+    /// <param name="serviceProvider"><see cref="IServiceProvider"/> instance to get service from</param>
+    /// <returns></returns>
+    private object GetExecutorServiceInstance(
+        IServiceProvider serviceProvider)
+    {
+        return serviceProvider.GetRequiredService(_handlerType);
+    }
+
+    private void FillOutCommandParameters(
+        ref object[] parameters,
+        CommandArgs args,
+        ParameterParser parameterParser)
+    {
         for (var i = 0; i < parameters.Length; i++)
         {
             var argMetaData = _parameterMetadatas.First(x => x.Value.Order == i);
@@ -195,8 +200,5 @@ internal class CommandHandlerExecutor
                     parameters[i] = Activator.CreateInstance(argMetaData.Value.DataType);
             }
         }
-
-        var task = (Task)_methodToExecute.Invoke(executor, parameters);
-        await task;
     }
 }

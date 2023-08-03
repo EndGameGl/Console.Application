@@ -1,11 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using System.Reflection;
-using System.Text;
-using Console.Application.Parsing;
+﻿using Console.Application.Parsing;
 using Console.Application.Reflection;
 using Console.Application.Routing;
 using Console.Application.Routing.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System.Reflection;
+using System.Text;
 
 namespace Console.Application;
 
@@ -79,12 +79,11 @@ internal class CommandHandler
         sb.AppendLine("exit - exits the app");
         sb.AppendLine("help - lists available commands");
 
-        foreach (var (commandName, executor) in _commandHandlerExecutors)
+        foreach (var (_, executor) in _commandHandlerExecutors)
         {
             sb.AppendLine($"{executor.Path} - {executor.Description}");
             var parameters = executor.ParameterMetadatas;
-            int paramCount;
-            if (!parameters.TryGetNonEnumeratedCount(out paramCount))
+            if (!parameters.TryGetNonEnumeratedCount(out var paramCount))
                 paramCount = parameters.Count();
             if (paramCount > 0)
             {
@@ -101,5 +100,10 @@ internal class CommandHandler
     internal IEnumerable<TypeInfo> FindAvailableCommandHandlers(Assembly assembly)
     {
         return assembly.DefinedTypes.Where(x => x.IsAssignableTo(_commandHandleBaseType));
+    }
+
+    internal CommandHandlerExecutor[] GetPossibleExecutors(string commandNameInput)
+    {
+        return _commandHandlerExecutors.Where(x => x.Key.Contains(commandNameInput)).Select(x => x.Value).ToArray();
     }
 }

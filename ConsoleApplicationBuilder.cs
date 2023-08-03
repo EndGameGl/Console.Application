@@ -10,8 +10,11 @@ public class ConsoleApplicationBuilder
     public IServiceCollection Services { get; }
     internal IList<Type> TypeParsers { get; }
 
+    internal readonly string[] Args;
+
     internal ConsoleApplicationBuilder(string[] args)
     {
+        Args = args;
         HostedServiceTypes = new List<Type>();
         TypeParsers = new List<Type>();
         Services = new ServiceCollection();
@@ -21,12 +24,16 @@ public class ConsoleApplicationBuilder
     private void RegisterDefaultParsers()
     {
         RegisterTypeParser<BooleanInputParser>();
+
         RegisterTypeParser<Int16InputParser>();
         RegisterTypeParser<UInt16InputParser>();
+
         RegisterTypeParser<Int32InputParser>();
         RegisterTypeParser<UInt32InputParser>();
+
         RegisterTypeParser<Int64InputParser>();
         RegisterTypeParser<UInt64InputParser>();
+
         RegisterTypeParser<StringInputParser>();
         RegisterTypeParser<CharInputParser>();
         RegisterTypeParser<FloatInputParser>();
